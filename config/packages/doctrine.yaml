@@ -1,0 +1,72 @@
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '8.0'
+
+    orm:
+        auto_generate_proxy_classes: true
+        enable_lazy_ghost_objects: true
+        report_fields_where_declared: true
+        validate_xml_mapping: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: false
+        mappings:
+            # Shared User entity
+            Shared:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Shared/Entity'
+                prefix: 'App\Shared\Entity'
+                alias: Shared
+
+            # Product Domain entities
+            ProductDomain:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Module/Product/Domain'
+                prefix: 'App\Module\Product\Domain'
+                alias: ProductDomain
+
+            # Inventory Domain entities
+            InventoryDomain:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Module/Inventory/Domain'
+                prefix: 'App\Module\Inventory\Domain'
+                alias: InventoryDomain
+
+            # Order Domain entities
+            OrderDomain:
+                is_bundle: false
+                type: attribute
+                dir: '%kernel.project_dir%/src/Module/Order/Domain'
+                prefix: 'App\Module\Order\Domain'
+                alias: OrderDomain
+
+when@test:
+    doctrine:
+        dbal:
+            # test against the same engine as production; keep a separate DB
+            url: '%env(resolve:DATABASE_URL)%'
+
+when@prod:
+    doctrine:
+        orm:
+            auto_generate_proxy_classes: false
+            proxy_dir: '%kernel.build_dir%/doctrine/orm/Proxies'
+            query_cache_driver:
+                type: pool
+                pool: doctrine.system_cache_pool
+            result_cache_driver:
+                type: pool
+                pool: doctrine.result_cache_pool
+
+    framework:
+        cache:
+            pools:
+                doctrine.result_cache_pool:
+                    adapter: cache.app
+                doctrine.system_cache_pool:
+                    adapter: cache.system

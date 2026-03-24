@@ -1,0 +1,48 @@
+parameters:
+    low_stock_threshold_default: 10
+
+services:
+    # -------------------------------------------------------------------------
+    # Default configuration: autowiring + autoconfiguration for all services
+    # -------------------------------------------------------------------------
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    # -------------------------------------------------------------------------
+    # Register all src/ classes as services by default,
+    # excluding: Domain entities/VOs/events/exceptions (not services),
+    # and the Kernel.
+    # -------------------------------------------------------------------------
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+            - '../src/Shared/Entity/'
+            - '../src/Module/Product/Domain/'
+            - '../src/Module/Inventory/Domain/'
+            - '../src/Module/Order/Domain/'
+
+    # -------------------------------------------------------------------------
+    # Repository interface → Doctrine implementation bindings
+    # -------------------------------------------------------------------------
+    App\Module\Product\Domain\ProductRepositoryInterface:
+        alias: App\Module\Product\Infrastructure\Persistence\DoctrineProductRepository
+
+    App\Module\Product\Domain\CategoryRepositoryInterface:
+        alias: App\Module\Product\Infrastructure\Persistence\DoctrineCategoryRepository
+
+    App\Module\Inventory\Domain\InventoryRepositoryInterface:
+        alias: App\Module\Inventory\Infrastructure\Persistence\DoctrineInventoryRepository
+
+    App\Module\Order\Domain\OrderRepositoryInterface:
+        alias: App\Module\Order\Infrastructure\Persistence\DoctrineOrderRepository
+
+    # -------------------------------------------------------------------------
+    # Shared event listener — map global exception to JSON API responses
+    # -------------------------------------------------------------------------
+    App\Shared\EventListener\ExceptionListener:
+        arguments:
+            $appEnvironment: '%kernel.environment%'
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception, priority: 0 }
